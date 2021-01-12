@@ -104,7 +104,7 @@ public class MessageListener implements AdvancedMessageListener {
             }
 
         } catch (SpreadException e) {
-            e.printStackTrace();
+           System.err.println("Error on Recieved SpreadMessage \n");
         }
     }
 
@@ -179,6 +179,7 @@ public class MessageListener implements AdvancedMessageListener {
 
     public void getRepository(JsonRepo new_repo){
         storageRepo = new_repo;
+        storageRepo.writeToFile();
     }
 
 }
