@@ -90,14 +90,14 @@ public class MessageListener implements AdvancedMessageListener {
 
                     case ELECTION_REQ:
                         System.out.println("Recieved ELECTION_REQ.");
-                        System.out.println("SENDING ELECTION RES...");
+                        System.out.println("SENDING ELECTION RES... \n");
 
                         sendRepository(msg, storageRepo);
                         break;
 
                     case ELECTION_RES:
                         System.out.println("Recieved ELECTION_RES.");
-                        System.out.println("Saving New Repository...");
+                        System.out.println("Saving New Repository... \n");
                         getRepository(obj.repo);
                         break;
                 }
@@ -111,36 +111,32 @@ public class MessageListener implements AdvancedMessageListener {
     @Override
     public void membershipMessageReceived(SpreadMessage spreadMessage) {
         MembershipInfo info = spreadMessage.getMembershipInfo();
+        System.out.println(CheckSameSender(info.getJoined()));
+        if(! spreadMessage.getSender().toString().equals("Config")){
+            if(info.isCausedByJoin() && CheckSameSender(info.getJoined())){
 
-        if(info.isCausedByJoin() && CheckSameSender(info.getJoined())){
+                RequestElection();
+            }
+            else if(info.isCausedByJoin() && ! CheckSameSender(info.getJoined())){
 
-            RequestElection();
+                System.out.println("Added " + info.getJoined() + " to Repo");
+                serverList.add(info.getJoined());
+            }
+            else if(info.isCausedByLeave() && ! CheckSameSender(info.getLeft())){
+
+                System.out.println("Removed " + info.getLeft() + " From Repo");
+                serverList.remove(info.getLeft());
+            }
+            else if(info.isCausedByDisconnect() && ! CheckSameSender(info.getDisconnected())){
+
+                System.out.println("Removed " + info.getDisconnected() + " From Repo");
+                serverList.remove(info.getDisconnected());
+            }
+
+            System.out.println("Servidores Atuais : ");
+            for(SpreadGroup sg : serverList)
+                System.out.println(sg);
         }
-        else if(info.isCausedByJoin() && ! CheckSameSender(info.getJoined())){
-
-            System.out.println("Added " + info.getJoined() + " to Repo");
-            serverList.add(info.getJoined());
-        }
-        else if(info.isCausedByLeave() && ! CheckSameSender(info.getLeft())){
-
-            System.out.println("Removed " + info.getLeft() + " From Repo");
-            serverList.remove(info.getLeft());
-        }
-        else if(info.isCausedByDisconnect() && ! CheckSameSender(info.getDisconnected())){
-
-            System.out.println("Removed " + info.getDisconnected() + " From Repo");
-            serverList.remove(info.getDisconnected());
-        }
-
-        System.out.println("Servidores Atuais : ");
-        for(SpreadGroup sg : serverList)
-            System.out.println(sg);
-
-        for(SpreadGroup sg : info.getMembers()){
-            System.out.println(sg.toString());
-            this.storageService.sendSpreadMSG(sg.toString(),MsgType.ELECTION_REQ, null, null);
-        }
-
     }
 
     private boolean CheckSameSender(SpreadGroup group ){
