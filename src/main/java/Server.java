@@ -36,7 +36,8 @@ public class Server{
 
 
         try {
-            this.grcpIP = Inet4Address.getLocalHost().getHostAddress();
+            InetAddress ip  = Inet4Address.getLocalHost();
+            this.grcpIP = ip.getHostAddress();
         } catch (UnknownHostException e) {
             System.err.println("Coudn't get GRCP IP ADDRESS");
         }
@@ -70,6 +71,7 @@ public class Server{
                 joingSpreadGroup(configGroup);
                 //apos entrar ao grupo, enviar msg com dados ip,port ao configServer
                 sendSpreadmsgOBJ(MsgType.SENTCONFIG, grcpIP, String.valueOf(grcpPort));
+
                 break;
             }catch(SpreadException e)  {
                 System.err.println("There was an error connecting to the daemon.");
