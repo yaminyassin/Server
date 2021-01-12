@@ -88,7 +88,12 @@ public class MessageListener implements AdvancedMessageListener {
 
     @Override
     public void membershipMessageReceived(SpreadMessage spreadMessage) {
-        PrintMessages.printMembershipInfo(spreadMessage.getMembershipInfo());
+        MembershipInfo info = spreadMessage.getMembershipInfo();
+        System.out.println("Members:");
+        for(SpreadGroup sg : info.getMembers()){
+            System.out.println(sg.toString());
+        }
+
     }
 
 }
