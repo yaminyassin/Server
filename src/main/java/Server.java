@@ -1,5 +1,6 @@
 import io.grpc.ServerBuilder;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import spread.*;
@@ -15,7 +16,7 @@ public class Server{
     private io.grpc.Server grcpServer;
 
     //vars do spread
-    private String spreadIP = "35.246.58.5";
+    private String spreadIP = "34.89.68.176";
     private String spreadName = "server";
     private final int spreadPort = 4803;
     private SpreadConnection spreadConn;
@@ -32,7 +33,7 @@ public class Server{
          try {
             this.grcpIP = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            System.err.println("Coudn't get GRCP IP ADDRESS");
         }
 
         this.startServers();
@@ -128,7 +129,7 @@ public class Server{
         InetAddress ip;
         String hostname;
         try {
-            ip = InetAddress.getLocalHost();
+            ip = Inet4Address.getLocalHost();
             hostname = ip.getHostName();
 
             System.out.println("Your current IP address : " + ip.getHostAddress());
