@@ -83,18 +83,6 @@ public class JsonRepo {
             e.printStackTrace();
         }
     }
-
-
-
-
-
-    public static void main(String[] args){
-        JsonRepo m = new JsonRepo("info.json");
-        m.get("88");
-        m.set("45149", "lindinho yamininho");
-        m.set("92a", "poop");
-        m.rem("92a");
-    }
 }
 
 
