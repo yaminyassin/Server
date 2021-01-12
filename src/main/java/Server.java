@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+
 import spread.*;
 
 
@@ -16,7 +18,7 @@ public class Server{
     private io.grpc.Server grcpServer;
 
     //vars do spread
-    private String spreadIP = "34.89.68.176";
+    private ArrayList<String> spreadIP = new ArrayList<String>();
     private String spreadName = "server";
     private final int spreadPort = 4803;
     private SpreadConnection spreadConn;
@@ -26,11 +28,14 @@ public class Server{
     public static final String configGroup = "Config";
 
     public Server(String[] args){
-        if(args.length > 0)
-            this.spreadIP = args[0];
+        spreadIP.add("34.89.68.176");
+        spreadIP.add("35.246.58.5");
+
+        if(args.length > 0 && this.spreadIP.contains(args[0]))
+            this.spreadIP.add(args[0]);
 
 
-         try {
+        try {
             this.grcpIP = Inet4Address.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             System.err.println("Coudn't get GRCP IP ADDRESS");
@@ -41,42 +46,38 @@ public class Server{
     }
 
     private void startServers(){
-        try  {
-            spreadConn= new SpreadConnection();
-            spreadConn.connect(
-                    Inet4Address.getByName(this.spreadIP),
-                    this.spreadPort,this.spreadName,
-                    false, true);
+        for(String ip: spreadIP){
+            try  {
+                spreadConn= new SpreadConnection();
+                spreadConn.connect(
+                        Inet4Address.getByName(ip),
+                        this.spreadPort,this.spreadName,
+                        false, true);
 
 
-            this.storageService = new StorageService(this.repo, this.spreadConn); //servico do grcp
-            this.grcpServer = ServerBuilder
-                    .forPort(grcpPort)
-                    .addService(this.storageService)
-                    .build();
+                this.storageService = new StorageService(this.repo, this.spreadConn); //servico do grcp
+                this.grcpServer = ServerBuilder
+                        .forPort(grcpPort)
+                        .addService(this.storageService)
+                        .build();
 
-            this.grcpServer.start();
+                this.grcpServer.start();
 
-            msgHandling = new MessageListener(this.storageService);
-            spreadConn.add(msgHandling);
+                msgHandling = new MessageListener(this.storageService);
+                spreadConn.add(msgHandling);
 
-            joingSpreadGroup(consensusGroup);
-            joingSpreadGroup(configGroup);
-            //apos entrar ao grupo, enviar msg com dados ip,port ao configServer
-            sendSpreadmsgOBJ(MsgType.SENTCONFIG, grcpIP, String.valueOf(grcpPort));
-
-        }
-        catch(SpreadException e)  {
-            System.err.println("There was an error connecting to the daemon.");
-            e.printStackTrace();
-            System.exit(1);
-        }
-        catch(UnknownHostException e) {
-            System.err.println("Can't find the daemon " + this.spreadIP);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Can't Start Grcp Server " + this.grcpPort);
-            System.exit(1);
+                joingSpreadGroup(consensusGroup);
+                joingSpreadGroup(configGroup);
+                //apos entrar ao grupo, enviar msg com dados ip,port ao configServer
+                sendSpreadmsgOBJ(MsgType.SENTCONFIG, grcpIP, String.valueOf(grcpPort));
+                break;
+            }catch(SpreadException e)  {
+                System.err.println("There was an error connecting to the daemon.");
+            }catch(UnknownHostException e) {
+                System.err.println("Can't find the daemon " + this.spreadIP);
+            }catch (IOException e) {
+                System.err.println("Can't Start Grcp Server " + this.grcpPort);
+            }
         }
     }
 
