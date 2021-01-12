@@ -111,11 +111,10 @@ public class MessageListener implements AdvancedMessageListener {
     @Override
     public void membershipMessageReceived(SpreadMessage spreadMessage) {
         MembershipInfo info = spreadMessage.getMembershipInfo();
-        System.out.println(CheckSameSender(info.getJoined()));
+
         if(! spreadMessage.getSender().toString().equals("Config")){
             if(info.isCausedByJoin() && CheckSameSender(info.getJoined())){
-
-                RequestElection();
+                RequestElection(info);
             }
             else if(info.isCausedByJoin() && ! CheckSameSender(info.getJoined())){
 
@@ -143,7 +142,12 @@ public class MessageListener implements AdvancedMessageListener {
         return connection.getPrivateGroup().toString().equals(group.toString());
     }
 
-    public void RequestElection(){
+    public void RequestElection(MembershipInfo info){
+        ArrayList<SpreadGroup> aux = new ArrayList<>(Arrays.asList(info.getMembers()));
+
+        aux.remove(this.connection.getPrivateGroup());
+        serverList = aux;
+
         if(serverList.size() > 0){
 
             SpreadGroup picked = serverList.get(randomPicker.nextInt(serverList.size()));
