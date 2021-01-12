@@ -91,7 +91,8 @@ public class Server{
     public void shutdownServers(){
         try { // shutdown and quit
             Scanner sc = new Scanner(System.in);
-            String a = sc.next();
+            sc.nextLine();
+
             this.grcpServer.shutdown();
             this.spreadConn.remove(this.msgHandling);
             this.spreadConn.disconnect();
