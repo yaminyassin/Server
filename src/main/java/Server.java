@@ -37,6 +37,7 @@ public class Server{
 
         try {
             InetAddress ip  = Inet4Address.getLocalHost();
+            System.out.println("Got ip addr -> " + grcpIP);
             this.grcpIP = ip.getHostAddress();
         } catch (UnknownHostException e) {
             System.err.println("Coudn't get GRCP IP ADDRESS");
