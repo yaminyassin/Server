@@ -27,22 +27,14 @@ public class Server{
     public static final String consensusGroup = "Consensus";
     public static final String configGroup = "Config";
 
-    public Server(String[] args){
+    public Server(String[] args, String autoIP){
         spreadIP.add("34.89.68.176");
         spreadIP.add("35.246.58.5");
 
         if(args.length > 0 && this.spreadIP.contains(args[0]))
             this.spreadIP.add(args[0]);
 
-
-        try {
-            InetAddress ip  = Inet4Address.getLocalHost();
-            System.out.println("Got ip addr -> " + grcpIP);
-            this.grcpIP = ip.getHostAddress();
-        } catch (UnknownHostException e) {
-            System.err.println("Coudn't get GRCP IP ADDRESS");
-        }
-
+        grcpIP = autoIP;
         this.startServers();
         this.shutdownServers();
     }
@@ -128,6 +120,20 @@ public class Server{
     }
 
     public static void main(String[] args) {
-        Server server = new Server(args);
+        InetAddress ip;
+        String hostname;
+        try {
+            ip = Inet4Address.getLocalHost();
+            hostname = ip.getHostName();
+
+            System.out.println("Your current IP address : " + ip.getHostAddress());
+            System.out.println("Your current Hostname : " + hostname);
+            System.out.println("Your current Port : " + InetAddress.getLoopbackAddress());
+            Server server = new Server(args, ip.getHostAddress());
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
     }
 }
