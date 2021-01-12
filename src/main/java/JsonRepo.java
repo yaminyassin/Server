@@ -24,7 +24,7 @@ public class JsonRepo {
            data = (JSONObject) parser.parse(new FileReader(filename));
 
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            System.err.println("Error on File Read");
         }
         return data;
     }
@@ -54,7 +54,7 @@ public class JsonRepo {
             writer.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+           System.err.println("Error on File Write JsonRepo.set");
         }
     }
 
@@ -70,14 +70,27 @@ public class JsonRepo {
             writer.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error on File Write JsonRepo.rem");
         }
     }
 
     public boolean contains(String key){
-
         return repositorio.containsKey(key);
     }
+
+    public void writeToFile(){
+        try {
+            FileWriter writer = null;
+            writer = new FileWriter(this.filename);
+            writer.write(this.repositorio.toJSONString());
+            writer.flush();
+            writer.close();
+
+        } catch (IOException e) {
+           System.err.println("Error on WriteToFile");
+        }
+    }
+
 }
 
 

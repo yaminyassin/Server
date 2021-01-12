@@ -100,7 +100,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
             this.spreadConn.multicast(msg);
 
         } catch (SpreadException e) {
-            System.err.println("Error on senfSpreadmsg on  \n");
+            System.err.println("Error on sendSpreadmsg on StorageService \n");
         }
     }
 

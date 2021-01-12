@@ -2,7 +2,14 @@ import io.grpc.stub.StreamObserver;
 import rpcstubs.Valor;
 import spread.*;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 
 
 public class MessageListener implements AdvancedMessageListener {
@@ -11,6 +18,8 @@ public class MessageListener implements AdvancedMessageListener {
     private StorageService storageService;
     private JsonRepo storageRepo;
     private HashMap<String, StreamObserver<Valor>> readWaitList;
+    private ArrayList<SpreadGroup> serverList = new ArrayList<>();
+    private final Random randomPicker = new Random();
 
     public MessageListener(StorageService storageService) {
         this.storageService = storageService;
@@ -60,10 +69,8 @@ public class MessageListener implements AdvancedMessageListener {
 
                             cliente.onNext(valor);
                             cliente.onCompleted();
-
                             readWaitList.remove(obj.key, cliente);
                         }
-
                         break;
 
                     case INVALIDATE:
@@ -72,12 +79,27 @@ public class MessageListener implements AdvancedMessageListener {
                         break;
 
                     case CONFIG_REQ:
-                        System.out.println("Recieved Data Request (IP, PORT) \n" );
+                        System.out.println("Recieved CONFIG_REQ(IP, PORT)" );
+                        System.out.println("Sending CONFIG_RES to Sender.. \n");
                         this.storageService.sendSpreadMSG(
                                 Server.configGroup,
                                 MsgType.CONFIG_RES,
                                 Server.grcpIP,
                                 String.valueOf(Server.grcpPort));
+                        break;
+
+                    case ELECTION_REQ:
+                        System.out.println("Recieved ELECTION_REQ.");
+                        System.out.println("SENDING ELECTION RES...");
+
+                        sendRepository(msg, storageRepo);
+                        break;
+
+                    case ELECTION_RES:
+                        System.out.println("Recieved ELECTION_RES.");
+                        System.out.println("Saving New Repository...");
+                        getRepository(obj.repo);
+                        break;
                 }
             }
 
@@ -89,11 +111,74 @@ public class MessageListener implements AdvancedMessageListener {
     @Override
     public void membershipMessageReceived(SpreadMessage spreadMessage) {
         MembershipInfo info = spreadMessage.getMembershipInfo();
-        System.out.println("Members:");
-        for(SpreadGroup sg : info.getMembers()){
-            System.out.println(sg.toString());
+
+        if(info.isCausedByJoin() && CheckSameSender(info.getJoined())){
+
+            RequestElection();
+        }
+        else if(info.isCausedByJoin() && ! CheckSameSender(info.getJoined())){
+
+            System.out.println("Added " + info.getJoined() + " to Repo");
+            serverList.add(info.getJoined());
+        }
+        else if(info.isCausedByLeave() && ! CheckSameSender(info.getLeft())){
+
+            System.out.println("Removed " + info.getLeft() + " From Repo");
+            serverList.remove(info.getLeft());
+        }
+        else if(info.isCausedByDisconnect() && ! CheckSameSender(info.getDisconnected())){
+
+            System.out.println("Removed " + info.getDisconnected() + " From Repo");
+            serverList.remove(info.getDisconnected());
         }
 
+        System.out.println("Servidores Atuais : ");
+        for(SpreadGroup sg : serverList)
+            System.out.println(sg);
+
+        for(SpreadGroup sg : info.getMembers()){
+            System.out.println(sg.toString());
+            this.storageService.sendSpreadMSG(sg.toString(),MsgType.ELECTION_REQ, null, null);
+        }
+
+    }
+
+    private boolean CheckSameSender(SpreadGroup group ){
+        return connection.getPrivateGroup().toString().equals(group.toString());
+    }
+
+    public void RequestElection(){
+        if(serverList.size() > 0){
+
+            SpreadGroup picked = serverList.get(randomPicker.nextInt(serverList.size()));
+
+            this.storageService.sendSpreadMSG(
+                    picked.toString(),
+                    MsgType.ELECTION_REQ,
+                    null,
+                    null
+            );
+        }else{
+            System.out.println("No Election Process Started..");
+        }
+    }
+
+    public void sendRepository(String group, JsonRepo repo) {
+        try {
+            SpreadMessage msg = new SpreadMessage();
+            msg.setSafe();
+
+            msg.addGroup(group);
+            msg.setObject(new MsgData(MsgType.ELECTION_RES, repo));
+            this.connection.multicast(msg);
+
+        } catch (SpreadException e) {
+            System.err.println("Error on sendSpreadmsg on StorageService \n");
+        }
+    }
+
+    public void getRepository(JsonRepo new_repo){
+        storageRepo = new_repo;
     }
 
 }
