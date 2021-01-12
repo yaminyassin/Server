@@ -31,7 +31,7 @@ public class Server{
 
 
          try {
-            this.grcpIP = InetAddress.getLocalHost().getHostAddress();
+            this.grcpIP = Inet4Address.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             System.err.println("Coudn't get GRCP IP ADDRESS");
         }
@@ -44,7 +44,7 @@ public class Server{
         try  {
             spreadConn= new SpreadConnection();
             spreadConn.connect(
-                    InetAddress.getByName(this.spreadIP),
+                    Inet4Address.getByName(this.spreadIP),
                     this.spreadPort,this.spreadName,
                     false, true);
 
@@ -124,22 +124,6 @@ public class Server{
     }
 
     public static void main(String[] args) {
-
-
-        InetAddress ip;
-        String hostname;
-        try {
-            ip = Inet4Address.getLocalHost();
-            hostname = ip.getHostName();
-
-            System.out.println("Your current IP address : " + ip.getHostAddress());
-            System.out.println("Your current Hostname : " + hostname);
-            System.out.println("Your current Port : " + InetAddress.getLoopbackAddress());
-
-        } catch (UnknownHostException e) {
-
-            e.printStackTrace();
-        }
         Server server = new Server(args);
     }
 }
