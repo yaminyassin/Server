@@ -1,9 +1,8 @@
 import io.grpc.ServerBuilder;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import spread.*;
 
@@ -91,13 +90,15 @@ public class Server{
 
     public void shutdownServers(){
         try { // shutdown and quit
-            this.grcpServer.awaitTermination();
+            Scanner sc = new Scanner(System.in);
+            String a = sc.next();
             this.grcpServer.shutdown();
             this.spreadConn.remove(this.msgHandling);
             this.spreadConn.disconnect();
-        } catch (SpreadException | InterruptedException e) {
+
+
+        } catch (SpreadException e) {
             System.err.println("error disconnecting spread server ");
-            e.printStackTrace();
         }
         System.exit(0);
     }
@@ -120,18 +121,13 @@ public class Server{
     }
 
     public static void main(String[] args) {
-        InetAddress ip;
-        String hostname;
         try {
-            ip = Inet4Address.getLocalHost();
-            hostname = ip.getHostName();
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress("google.com", 80));
+            String ip = socket.getLocalAddress().toString().substring(1);
 
-            System.out.println("Your current IP address : " + ip.getHostAddress());
-            System.out.println("Your current Hostname : " + hostname);
-            System.out.println("Your current Port : " + InetAddress.getLoopbackAddress());
-            Server server = new Server(args, ip.getHostAddress());
-
-        } catch (UnknownHostException e) {
+            Server server = new Server(args, ip);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
