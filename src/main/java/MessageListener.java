@@ -1,14 +1,22 @@
+import io.grpc.stub.StreamObserver;
+import rpcstubs.Valor;
 import spread.*;
+
+import java.util.HashMap;
 
 
 public class MessageListener implements AdvancedMessageListener {
 
     private SpreadConnection connection;
     private StorageService storageService;
+    private JsonRepo storageRepo;
+    private HashMap<String, StreamObserver<Valor>> readWaitList;
 
     public MessageListener(StorageService storageService) {
         this.storageService = storageService;
-        this.connection= storageService.getSpreadConn();
+        this.connection = storageService.getSpreadConn();
+        this.storageRepo = storageService.getStorageRepo();
+        this.readWaitList = storageService.getReadWaitList();
     }
 
     @Override
@@ -23,7 +31,7 @@ public class MessageListener implements AdvancedMessageListener {
                 switch (obj.msgType) {
                     case READ_REQ:
                         System.out.println("Recieved READ_REQ From: " + msg + "\n");
-                        String value = (String) this.storageService.getRepo().get(obj.key);
+                        String value = (String) storageRepo.get(obj.key);
 
                         if(value != null)
                             this.storageService.sendSpreadMSG(
@@ -35,12 +43,32 @@ public class MessageListener implements AdvancedMessageListener {
 
                     case READ_RES:
                         System.out.println("Recieved READ_RES With {" + obj.key + ", " + obj.value + "}. \n");
-                        this.storageService.getRepo().set(obj.key, obj.value); //guardar o valor recebido
+
+                        if(storageRepo.contains(obj.key)){
+                            this.storageService.sendSpreadMSG(
+                                    Server.consensusGroup,
+                                    MsgType.INVALIDATE,
+                                    obj.key,
+                                    obj.value);
+                        }else{
+                            Valor valor = Valor
+                                    .newBuilder()
+                                    .setValue(obj.value)
+                                    .build();
+
+                            StreamObserver<Valor> cliente = readWaitList.get(obj.key);
+
+                            cliente.onNext(valor);
+                            cliente.onCompleted();
+
+                            readWaitList.remove(obj.key, cliente);
+                        }
+
                         break;
 
                     case INVALIDATE:
                         System.out.println("Recieved INVALIDATE for Key: " + obj.key + "\n");
-                        this.storageService.getRepo().rem(obj.key);
+                        storageRepo.rem(obj.key);
                         break;
 
                     case CONFIG_REQ:

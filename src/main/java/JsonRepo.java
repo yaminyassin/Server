@@ -31,9 +31,9 @@ public class JsonRepo {
 
     private void printkeyExists(String key) {
         if (this.repositorio.get(key) == null)
-            System.out.println("Key doesn't exist");
+            System.out.println("Key Doesn't Exist on Local");
         else
-            System.out.println("Key-Value exists!");
+            System.out.println("Key Exists on Local");
     }
 
 
@@ -72,6 +72,11 @@ public class JsonRepo {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean contains(String key){
+
+        return repositorio.containsKey(key);
     }
 }
 

@@ -14,6 +14,10 @@ public class MsgData implements Serializable {
         this.msgType = msgType;
         this.key = key;
     }
+    public MsgData(String key, String value){
+        this.value = value;
+        this.key = key;
+    }
     public MsgData(MsgType msgType) {
         this.msgType = msgType;
     }

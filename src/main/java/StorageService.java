@@ -5,39 +5,41 @@ import spread.SpreadConnection;
 import spread.SpreadException;
 import spread.SpreadMessage;
 
+import java.util.HashMap;
+
 
 public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
 
-    private JsonRepo repo;
+    private JsonRepo storageRepo;
     private SpreadConnection spreadConn;
+    private HashMap<String, StreamObserver<Valor>> readWaitList = new HashMap<>();
 
     public StorageService(JsonRepo repo, SpreadConnection spreadConn){
-        this.repo = repo;
+        this.storageRepo = repo;
         this.spreadConn = spreadConn;
     }
 
-    public JsonRepo getRepo(){
-        return this.repo;
-    }
-
-    public SpreadConnection getSpreadConn() {
-        return spreadConn;
-    }
-
+    /**
+     * 1 - Faco write da chave/valor no repositorio;
+     * 2 - Envio um READ_REQ ao grupo Consensus;
+     * 3 - Se alguem tiver a mesma chave, envio uma msg Invalidate;
+     *
+     * @param responseObserver
+     */
     @Override
     public void write(Par request, StreamObserver<Void> responseObserver) {
         String key = request.getChave().getValue();
         String value = request.getValor().getValue();
 
+        this.storageRepo.set(key, value);
+        System.out.println("Written : "+ key + ", " + value);
+
         this.sendSpreadMSG(
                 Server.consensusGroup,
-                MsgType.INVALIDATE,
+                MsgType.READ_REQ,
                 key,
                 value
         );
-
-        this.repo.set(key, value);
-        System.out.println("Written : "+ key + ", " + value);
 
         responseObserver.onNext(Void
                 .newBuilder()
@@ -49,46 +51,32 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
     @Override
     public void read(Chave request, StreamObserver<Valor> responseObserver) {
         String key = request.getValue();
-        int contador = 0;
-        String value = (String) this.repo.get(key);
+
+        String value = (String) this.storageRepo.get(key);
 
         // -------pedir ao grupo Consensus pela chave
         if(value == null){
-            System.out.println("Key Doesn't Exist.. Requesting From Cluster. \n");
             sendSpreadMSG(
                     Server.consensusGroup,
                     MsgType.READ_REQ,
                     key,
                     null);
+
+            readWaitList.put(key, responseObserver);
         }
 
-        // -------verificar se recebeu valor da chave 5x
-        while(value == null && contador < 5){
+        int contador = 0;
+
+        while(contador <= 5 && readWaitList.containsValue(responseObserver)){
             try {
                 Thread.sleep(1000);
-                value = (String) this.repo.get(key);
                 contador +=1;
-            }catch (InterruptedException e) {
-                System.err.println("Something Went Wrong on StorageService.read()");
+            } catch (InterruptedException e) {
+                System.out.println("erro no threadsleep do read");
             }
         }
 
-        /*
-        se recebeu, envia msg para invalidar chave aos outros servers e
-        finalmente, envia de volta o valor da chave ao cliente
-        */
-        if(value != null){
-            Valor valor = Valor
-                    .newBuilder()
-                    .setValue(value)
-                    .build();
-
-            repo.rem(key);
-
-            responseObserver.onNext(valor);
-            responseObserver.onCompleted();
-
-        }else{ //se nao existe envia um valor vazio
+        if(readWaitList.containsValue(responseObserver)){
             Valor valor = Valor
                     .newBuilder()
                     .setVoid(Void.newBuilder().build())
@@ -98,6 +86,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
 
             responseObserver.onNext(valor);
             responseObserver.onCompleted();
+            readWaitList.remove(key, responseObserver);
         }
     }
 
@@ -116,4 +105,15 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
     }
 
 
+    public JsonRepo getStorageRepo() {
+        return storageRepo;
+    }
+
+    public SpreadConnection getSpreadConn() {
+        return spreadConn;
+    }
+
+    public HashMap<String, StreamObserver<Valor>> getReadWaitList() {
+        return readWaitList;
+    }
 }
