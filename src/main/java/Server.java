@@ -47,7 +47,6 @@ public class Server{
                         this.spreadPort,this.spreadName,
                         false, true);
 
-
                 this.storageService = new StorageService(this.repo, this.spreadConn); //servico do grcp
                 this.grcpServer = ServerBuilder
                         .forPort(grcpPort)
@@ -57,20 +56,24 @@ public class Server{
                 this.grcpServer.start();
 
                 msgHandling = new MessageListener(this.storageService);
-                spreadConn.add(msgHandling);
 
+                spreadConn.add(msgHandling);
                 joingSpreadGroup(consensusGroup);
                 joingSpreadGroup(configGroup);
-                //apos entrar ao grupo, enviar msg com dados ip,port ao configServer
-                sendSpreadmsgOBJ(MsgType.SENTCONFIG, grcpIP, String.valueOf(grcpPort));
 
+                //apos entrar ao grupo, enviar msg com dados ip,port ao configServer
+                sendSpreadmsgOBJ(MsgType.CONFIG_RES, grcpIP, String.valueOf(grcpPort));
                 break;
+
             }catch(SpreadException e)  {
-                System.err.println("There was an error connecting to the daemon.");
-            }catch(UnknownHostException e) {
-                System.err.println("Can't find the daemon " + this.spreadIP);
-            }catch (IOException e) {
-                System.err.println("Can't Start Grcp Server " + this.grcpPort);
+                System.err.println("Error Connecting to Daemon. \n");
+            }
+            catch(UnknownHostException e) {
+                System.err.println("Can't Find Daemon, Unkown Host " + this.spreadIP +"\n");
+                System.exit(1);
+            } catch (IOException e) {
+                System.err.println("Can't Start Grcp Server " + this.grcpPort + "\n");
+                System.exit(1);
             }
         }
     }
@@ -81,15 +84,14 @@ public class Server{
             SpreadGroup group = new SpreadGroup();
             group.join(this.spreadConn, name);
         } catch (SpreadException e) {
-            e.printStackTrace();
-            System.err.println("Failed to join Group, " + name);
+            System.err.println("Failed to join Group " + name + "\n");
         }
     }
 
 
 
     public void shutdownServers(){
-        try { // shutdown and quit
+        try {
             Scanner sc = new Scanner(System.in);
             sc.nextLine();
 
@@ -99,7 +101,7 @@ public class Server{
 
 
         } catch (SpreadException e) {
-            System.err.println("error disconnecting spread server ");
+            System.err.println("Error Disconnecting Spread Server \n");
         }
         System.exit(0);
     }
@@ -110,14 +112,13 @@ public class Server{
         try {
             SpreadMessage msg = new SpreadMessage();
             msg.setSafe();
-            msg.addGroup(this.configGroup);
+            msg.addGroup(configGroup);
             msg.setObject(new MsgData(msgType, key, value));
 
             this.spreadConn.multicast(msg);
 
         } catch (SpreadException e) {
-            e.printStackTrace();
-            System.err.println("Error on Spread Send Message");
+            System.err.println("Error on Spread Send Message \n");
         }
     }
 

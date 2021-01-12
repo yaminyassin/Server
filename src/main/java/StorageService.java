@@ -3,7 +3,6 @@ import rpcstubs.Void;
 import rpcstubs.*;
 import spread.SpreadConnection;
 import spread.SpreadException;
-import spread.SpreadGroup;
 import spread.SpreadMessage;
 
 
@@ -30,13 +29,16 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
         String key = request.getChave().getValue();
         String value = request.getValor().getValue();
 
-        /*
-        Invalidar a chave nos outros servers!!!!!
-         */
+        this.sendSpreadMSG(
+                Server.consensusGroup,
+                MsgType.INVALIDATE,
+                key,
+                value
+        );
 
         this.repo.set(key, value);
+        System.out.println("Written : "+ key + ", " + value);
 
-        System.out.println("Guardou: "+ key + "," + value);
         responseObserver.onNext(Void
                 .newBuilder()
                 .build()
@@ -52,10 +54,10 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
 
         // -------pedir ao grupo Consensus pela chave
         if(value == null){
-            System.out.println("Valor nao Existe!.. Pedindo ao Grupo");
-            sendSpreadmsgOBJ(
+            System.out.println("Key Doesn't Exist.. Requesting From Cluster. \n");
+            sendSpreadMSG(
                     Server.consensusGroup,
-                    MsgType.REQUEST,
+                    MsgType.READ_REQ,
                     key,
                     null);
         }
@@ -67,7 +69,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
                 value = (String) this.repo.get(key);
                 contador +=1;
             }catch (InterruptedException e) {
-                System.out.println("Something went wrong on StorageService.read()");
+                System.err.println("Something Went Wrong on StorageService.read()");
             }
         }
 
@@ -75,19 +77,13 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
         se recebeu, envia msg para invalidar chave aos outros servers e
         finalmente, envia de volta o valor da chave ao cliente
         */
-        if(value!= null){
-            this.sendSpreadmsgOBJ(
-                    Server.consensusGroup,
-                    MsgType.INVALIDATE,
-                    key,
-                    value);
-
+        if(value != null){
             Valor valor = Valor
                     .newBuilder()
                     .setValue(value)
                     .build();
 
-            System.out.println("Leu valor: "+ valor.getValue());
+            repo.rem(key);
 
             responseObserver.onNext(valor);
             responseObserver.onCompleted();
@@ -97,13 +93,15 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
                     .newBuilder()
                     .setVoid(Void.newBuilder().build())
                     .build();
-            System.out.println("sending VOID to client");
+
+            System.out.println("Key Doesn't Exist. \n");
+
             responseObserver.onNext(valor);
             responseObserver.onCompleted();
         }
     }
 
-    public void sendSpreadmsgOBJ(String group, MsgType msgType, String key, String value) {
+    public void sendSpreadMSG(String group, MsgType msgType, String key, String value) {
         try {
             SpreadMessage msg = new SpreadMessage();
             msg.setSafe();
@@ -113,8 +111,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
             this.spreadConn.multicast(msg);
 
         } catch (SpreadException e) {
-            e.printStackTrace();
-            System.err.println("Error on Spread Send Message");
+            System.err.println("Error on senfSpreadmsg on  \n");
         }
     }
 

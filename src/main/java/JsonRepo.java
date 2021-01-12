@@ -29,7 +29,7 @@ public class JsonRepo {
         return data;
     }
 
-    private void printkeyExists(Object key) {
+    private void printkeyExists(String key) {
         if (this.repositorio.get(key) == null)
             System.out.println("Key doesn't exist");
         else
@@ -37,26 +37,19 @@ public class JsonRepo {
     }
 
 
-    public Object get(Object key) {
-        System.out.println(" ------------- JsonRepo.GET ------------- ");
+    public Object get(String key) {
         this.printkeyExists(key);
 
         return this.repositorio.get(key);
     }
 
-    public void set(Object key, Object value){
-        System.out.println(" ------------- JsonRepo.SET ------------- ");
-        printkeyExists(key);
-
-        this.repositorio.put(key, value);
-        FileWriter writer = null;
-
+    public void set(String key, String value){
         try {
+            printkeyExists(key);
+            this.repositorio.put(key, value);
+            FileWriter writer = null;
             writer = new FileWriter(this.filename);
             writer.write(this.repositorio.toJSONString());
-
-            System.out.println("Contents written in JSON file.");
-
             writer.flush();
             writer.close();
 
@@ -66,15 +59,12 @@ public class JsonRepo {
     }
 
     public void rem(Object key){
-
         this.repositorio.remove(key);
         FileWriter writer = null;
 
         try {
             writer = new FileWriter(this.filename);
             writer.write(this.repositorio.toJSONString());
-
-            System.out.println("Contents written in JSON file.");
 
             writer.flush();
             writer.close();
