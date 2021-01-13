@@ -92,11 +92,16 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
 
     public void sendSpreadMSG(String group, MsgType msgType, String key, String value) {
         try {
+            MsgData data = new MsgData();
+            data.setMsgType(msgType);
+            data.setKey(key);
+            data.setValue(value);
+
             SpreadMessage msg = new SpreadMessage();
             msg.setSafe();
 
             msg.addGroup(group);
-            msg.setObject(new MsgData(msgType, key, value));
+            msg.setObject(data);
             this.spreadConn.multicast(msg);
 
         } catch (SpreadException e) {

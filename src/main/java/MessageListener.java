@@ -2,10 +2,6 @@ import io.grpc.stub.StreamObserver;
 import rpcstubs.Valor;
 import spread.*;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,7 +88,7 @@ public class MessageListener implements AdvancedMessageListener {
                         System.out.println("Recieved ELECTION_REQ.");
                         System.out.println("SENDING ELECTION RES... \n");
 
-                        sendRepository(msg, storageRepo);
+                        sendRepository();
                         break;
 
                     case ELECTION_RES:
@@ -163,15 +159,19 @@ public class MessageListener implements AdvancedMessageListener {
         }
     }
 
-    public void sendRepository(String group, JsonRepo repo) {
+    public void sendRepository() {
         try {
+            MsgData data = new MsgData();
+            data.setMsgType(MsgType.ELECTION_RES);
+            data.setRepo(storageRepo);
+            data.setKey(this.connection.getPrivateGroup().toString());
+
             SpreadMessage msg = new SpreadMessage();
             msg.setSafe();
+            msg.addGroup(Server.consensusGroup);
+            msg.setObject(data);
 
-            msg.addGroup(group);
-            msg.setObject(new MsgData(MsgType.ELECTION_RES, repo));
             this.connection.multicast(msg);
-
         } catch (SpreadException e) {
             System.err.println("Error on sendSpreadmsg on StorageService \n");
         }

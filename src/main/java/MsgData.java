@@ -5,26 +5,21 @@ public class MsgData implements Serializable {
     String key;
     String value;
     JsonRepo repo;
+    public MsgData(){}
 
-    public MsgData(MsgType msgType, String key, String value){
+    public void setMsgType(MsgType msgType) {
+        this.msgType = msgType;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public void setValue(String value) {
         this.value = value;
-        this.key = key;
-        this.msgType = msgType;
     }
-    public MsgData(MsgType msgType, String key){
-        this.msgType = msgType;
-        this.key = key;
-    }
-    public MsgData(String key, String value){
-        this.value = value;
-        this.key = key;
-    }
-    public MsgData(MsgType msgType) {
-        this.msgType = msgType;
-    }
-    public MsgData(MsgType msgType, JsonRepo repo){
-        this.msgType = msgType;
+
+    public void setRepo(JsonRepo repo) {
         this.repo = repo;
     }
-    public MsgData(){}
 }

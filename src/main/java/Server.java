@@ -17,7 +17,7 @@ public class Server{
     private io.grpc.Server grcpServer;
 
     //vars do spread
-    private ArrayList<String> spreadIP = new ArrayList<String>();
+    private ArrayList<String> spreadIP = new ArrayList<>();
     private String spreadName = "server";
     private final int spreadPort = 4803;
     private SpreadConnection spreadConn;
@@ -62,7 +62,12 @@ public class Server{
                 joingSpreadGroup(configGroup);
 
                 //apos entrar ao grupo, enviar msg com dados ip,port ao configServer
-                sendSpreadmsgOBJ(MsgType.CONFIG_RES, grcpIP, String.valueOf(grcpPort));
+                this.storageService.sendSpreadMSG(
+                        configGroup,
+                        MsgType.CONFIG_RES,
+                        grcpIP,
+                        String.valueOf(grcpPort)
+                );
                 break;
 
             }catch(SpreadException e)  {
@@ -106,21 +111,6 @@ public class Server{
         System.exit(0);
     }
 
-
-    private void sendSpreadmsgOBJ(MsgType msgType, String key, String value) {
-
-        try {
-            SpreadMessage msg = new SpreadMessage();
-            msg.setSafe();
-            msg.addGroup(configGroup);
-            msg.setObject(new MsgData(msgType, key, value));
-
-            this.spreadConn.multicast(msg);
-
-        } catch (SpreadException e) {
-            System.err.println("Error on Spread Send Message \n");
-        }
-    }
 
     public static void main(String[] args) {
         try {
