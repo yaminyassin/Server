@@ -88,7 +88,7 @@ public class MessageListener implements AdvancedMessageListener {
                         System.out.println("Recieved ELECTION_REQ.");
                         System.out.println("SENDING ELECTION RES... \n");
 
-                        sendRepository();
+                        sendRepository(msg);
                         break;
 
                     case ELECTION_RES:
@@ -100,7 +100,7 @@ public class MessageListener implements AdvancedMessageListener {
             }
 
         } catch (SpreadException e) {
-           System.err.println("Error on Recieved SpreadMessage \n");
+            System.err.println("Error on Recieved SpreadMessage \n");
         }
     }
 
@@ -159,7 +159,7 @@ public class MessageListener implements AdvancedMessageListener {
         }
     }
 
-    public void sendRepository() {
+    public void sendRepository(String group) {
         try {
             MsgData data = new MsgData();
             data.setMsgType(MsgType.ELECTION_RES);
@@ -168,7 +168,7 @@ public class MessageListener implements AdvancedMessageListener {
 
             SpreadMessage msg = new SpreadMessage();
             msg.setSafe();
-            msg.addGroup(Server.consensusGroup);
+            msg.addGroup(group);
             msg.setObject(data);
 
             this.connection.multicast(msg);
