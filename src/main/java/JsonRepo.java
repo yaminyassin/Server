@@ -4,9 +4,10 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 
 
-public class JsonRepo {
+public class JsonRepo implements Serializable {
 
     private final String filename;
     private JSONObject repositorio;
