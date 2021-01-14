@@ -1,4 +1,4 @@
-package server;
+package StorageServer;
 
 import io.grpc.ServerBuilder;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class Server{
 
     //vars do spread
     private ArrayList<String> spreadIP = new ArrayList<>();
-    private String spreadName = "YaminServer";
+    private String spreadName = "Yaminver22";
     private final int spreadPort = 4803;
     private SpreadConnection spreadConn;
     private MessageListener msgHandling;

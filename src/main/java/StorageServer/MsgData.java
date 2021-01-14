@@ -1,4 +1,4 @@
-package server;
+package StorageServer;
 
 import java.io.Serializable;
 

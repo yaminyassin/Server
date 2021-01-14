@@ -1,4 +1,4 @@
-package server;
+package StorageServer;
 
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Valor;
