@@ -16,7 +16,9 @@ public class JsonRepo implements Serializable {
 
         try {
             file = new File(filename);
-            if(!file.createNewFile()){
+            if(file.exists()){
+                System.out.println("file exists! \n");
+            }else{
                 FileWriter wr = new FileWriter(filename);
                 wr.write("{}");
                 wr.close();
