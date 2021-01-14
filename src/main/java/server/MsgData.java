@@ -1,3 +1,5 @@
+package server;
+
 import java.io.Serializable;
 
 public class MsgData implements Serializable {

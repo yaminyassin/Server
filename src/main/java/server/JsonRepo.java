@@ -1,18 +1,25 @@
+package server;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+
+import java.io.*;
 
 
 public class JsonRepo implements Serializable {
 
     private final String filename;
     private JSONObject repositorio;
-
+    private File yourFile = new File("info.json");
     public JsonRepo(String filename) {
+
+        try {
+            yourFile.createNewFile(); // if file already exists will do nothing
+        } catch (IOException e) {
+            System.err.println("Coudn't create file");
+        }
+
         this.filename = filename;
         this.repositorio = (JSONObject)readFile(this.filename);
     }
@@ -20,8 +27,9 @@ public class JsonRepo implements Serializable {
     private Object readFile(String filename){
         JSONParser parser = new JSONParser();
         JSONObject data = new JSONObject();
-
         try {
+
+
            data = (JSONObject) parser.parse(new FileReader(filename));
 
         } catch (IOException | ParseException e) {
@@ -55,7 +63,7 @@ public class JsonRepo implements Serializable {
             writer.close();
 
         } catch (IOException e) {
-           System.err.println("Error on File Write JsonRepo.set");
+           System.err.println("Error on File Write server.JsonRepo.set");
         }
     }
 
@@ -71,7 +79,7 @@ public class JsonRepo implements Serializable {
             writer.close();
 
         } catch (IOException e) {
-            System.err.println("Error on File Write JsonRepo.rem");
+            System.err.println("Error on File Write server.JsonRepo.rem");
         }
     }
 

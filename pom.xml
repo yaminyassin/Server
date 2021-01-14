@@ -49,6 +49,13 @@
             <systemPath>${basedir}/../lib/StorageContract-1.0.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>CD_G20</groupId>
+            <artifactId>Spread</artifactId>
+            <version>4.4.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../lib/spread-4.4.0.jar</systemPath>
+        </dependency>
 
     </dependencies>
 

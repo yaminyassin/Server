@@ -1,3 +1,5 @@
+package server;
+
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Void;
 import rpcstubs.*;
@@ -87,6 +89,17 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
             responseObserver.onNext(valor);
             responseObserver.onCompleted();
             readWaitList.remove(key, responseObserver);
+        }else{
+            assert value != null;
+            Valor valor = Valor
+                    .newBuilder()
+                    .setValue(value)
+                    .build();
+
+            System.out.println("Key Doesn't Exist. \n");
+
+            responseObserver.onNext(valor);
+            responseObserver.onCompleted();
         }
     }
 
@@ -105,7 +118,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
             this.spreadConn.multicast(msg);
 
         } catch (SpreadException e) {
-            System.err.println("Error on sendSpreadmsg on StorageService \n");
+            System.err.println("Error on sendSpreadmsg on server.StorageService \n");
         }
     }
 

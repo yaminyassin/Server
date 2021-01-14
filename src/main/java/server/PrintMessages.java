@@ -1,3 +1,5 @@
+package server;
+
 import spread.MembershipInfo;
 import spread.SpreadGroup;
 import spread.SpreadMessage;

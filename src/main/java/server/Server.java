@@ -1,3 +1,5 @@
+package server;
+
 import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.net.*;
@@ -77,7 +79,7 @@ public class Server{
                 System.err.println("Can't Find Daemon, Unkown Host " + this.spreadIP +"\n");
                 System.exit(1);
             } catch (IOException e) {
-                System.err.println("Can't Start Grcp Server " + this.grcpPort + "\n");
+                System.err.println("Can't Start Grcp server.Server " + this.grcpPort + "\n");
                 System.exit(1);
             }
         }
@@ -106,7 +108,7 @@ public class Server{
 
 
         } catch (SpreadException e) {
-            System.err.println("Error Disconnecting Spread Server \n");
+            System.err.println("Error Disconnecting Spread server.Server \n");
         }
         System.exit(0);
     }

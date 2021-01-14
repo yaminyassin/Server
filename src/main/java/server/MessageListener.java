@@ -1,3 +1,5 @@
+package server;
+
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Valor;
 import spread.*;
@@ -173,7 +175,7 @@ public class MessageListener implements AdvancedMessageListener {
 
             this.connection.multicast(msg);
         } catch (SpreadException e) {
-            System.err.println("Error on sendSpreadmsg on StorageService \n");
+            System.err.println("Error on sendSpreadmsg on server.StorageService \n");
         }
     }
 
