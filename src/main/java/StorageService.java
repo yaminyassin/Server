@@ -36,7 +36,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
 
         this.sendSpreadMSG(
                 Server.consensusGroup,
-                MsgType.READ_REQ,
+                MsgType.INVALIDATE,
                 key,
                 value
         );
