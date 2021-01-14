@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 import io.grpc.ServerBuilder;
 import java.io.IOException;

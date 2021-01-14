@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 public enum MsgType {
     READ_REQ, READ_RES, INVALIDATE, CONFIG_REQ, CONFIG_RES, ELECTION_REQ, ELECTION_RES
