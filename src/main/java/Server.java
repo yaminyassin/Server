@@ -18,7 +18,7 @@ public class Server{
 
     //vars do spread
     private ArrayList<String> spreadIP = new ArrayList<>();
-    private String spreadName = "server";
+    private String spreadName = "YaminServer";
     private final int spreadPort = 4803;
     private SpreadConnection spreadConn;
     private MessageListener msgHandling;
