@@ -1,3 +1,5 @@
+package server;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -67,7 +69,7 @@ public class JsonRepo implements Serializable {
             writer.close();
 
         } catch (IOException e) {
-            System.err.println("Error on File Write JsonRepo.set");
+            System.err.println("Error on File Write server.JsonRepo.set");
         }
     }
 
@@ -83,7 +85,7 @@ public class JsonRepo implements Serializable {
             writer.close();
 
         } catch (IOException e) {
-            System.err.println("Error on File Write JsonRepo.rem");
+            System.err.println("Error on File Write server.JsonRepo.rem");
         }
     }
 
