@@ -8,7 +8,7 @@ import java.util.Scanner;
 import spread.*;
 
 
-public class StorageServer {
+public class Server {
     //vars de grcp
     private final String filename = "info.json";
     private JsonRepo repo = new JsonRepo(this.filename);
@@ -25,16 +25,15 @@ public class StorageServer {
     public static final String consensusGroup = "Consensus";
     public static final String configGroup = "Config";
 
-    public StorageServer(String[] args, String autoIP){
-
+    public Server(String[] args, String autoIP){
+        grcpIP = autoIP;
         if(args.length > 0 && spreadIP.contains(args[0])){
             spreadName = args[0];
-            spreadIP= args[1];
+            grcpIP= args[1];
             grcpPort = Integer.parseInt(args[2]);
-
         }
 
-        grcpIP = autoIP;
+
         this.startServers();
         this.shutdownServers();
     }
@@ -124,7 +123,7 @@ public class StorageServer {
             socket.connect(new InetSocketAddress("google.com", 80));
             String ip = socket.getLocalAddress().toString().substring(1);
 
-            StorageServer server = new StorageServer(args, ip);
+            Server server = new Server(args, ip);
         } catch (IOException e) {
             e.printStackTrace();
         }

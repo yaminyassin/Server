@@ -42,7 +42,7 @@ public class MessageListener implements AdvancedMessageListener {
 
                         if(value != null)
                             this.storageService.sendSpreadMSG(
-                                    StorageServer.consensusGroup,
+                                    Server.consensusGroup,
                                     MsgType.READ_RES,
                                     obj.key,
                                     value);
@@ -53,7 +53,7 @@ public class MessageListener implements AdvancedMessageListener {
 
                         if(storageRepo.contains(obj.key)){
                             this.storageService.sendSpreadMSG(
-                                    StorageServer.consensusGroup,
+                                    Server.consensusGroup,
                                     MsgType.INVALIDATE,
                                     obj.key,
                                     obj.value);
@@ -80,10 +80,10 @@ public class MessageListener implements AdvancedMessageListener {
                         System.out.println("Recieved CONFIG_REQ(IP, PORT)" );
                         System.out.println("Sending CONFIG_RES to Sender.. \n");
                         this.storageService.sendSpreadMSG(
-                                StorageServer.configGroup,
+                                Server.configGroup,
                                 MsgType.CONFIG_RES,
-                                StorageServer.grcpIP,
-                                String.valueOf(StorageServer.grcpPort));
+                                Server.grcpIP,
+                                String.valueOf(Server.grcpPort));
                         break;
 
                     case ELECTION_REQ:

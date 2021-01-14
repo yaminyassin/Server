@@ -37,7 +37,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
         System.out.println("Written : "+ key + ", " + value);
 
         this.sendSpreadMSG(
-                StorageServer.consensusGroup,
+                Server.consensusGroup,
                 MsgType.INVALIDATE,
                 key,
                 value
@@ -59,7 +59,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
         // -------pedir ao grupo Consensus pela chave
         if(value == null){
             sendSpreadMSG(
-                    StorageServer.consensusGroup,
+                    Server.consensusGroup,
                     MsgType.READ_REQ,
                     key,
                     null);
