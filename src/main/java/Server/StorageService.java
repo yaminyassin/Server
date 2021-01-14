@@ -1,4 +1,4 @@
-package StorageServer;
+package Server;
 
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Void;
@@ -37,7 +37,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
         System.out.println("Written : "+ key + ", " + value);
 
         this.sendSpreadMSG(
-                Server.consensusGroup,
+                StorageServer.consensusGroup,
                 MsgType.INVALIDATE,
                 key,
                 value
@@ -59,7 +59,7 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
         // -------pedir ao grupo Consensus pela chave
         if(value == null){
             sendSpreadMSG(
-                    Server.consensusGroup,
+                    StorageServer.consensusGroup,
                     MsgType.READ_REQ,
                     key,
                     null);

@@ -1,15 +1,14 @@
-package StorageServer;
+package Server;
 
 import io.grpc.ServerBuilder;
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 import spread.*;
 
 
-public class Server{
+public class StorageServer {
     //vars de grcp
     private final String filename = "info.json";
     private JsonRepo repo = new JsonRepo(this.filename);
@@ -19,21 +18,21 @@ public class Server{
     private io.grpc.Server grcpServer;
 
     //vars do spread
-    private ArrayList<String> spreadIP = new ArrayList<>();
-    private String spreadName = "Yaminver22";
-    private final int spreadPort = 4803;
+    private String spreadIP = "35.246.58.5";
     private SpreadConnection spreadConn;
     private MessageListener msgHandling;
-
+    private String spreadName = "serv";
     public static final String consensusGroup = "Consensus";
     public static final String configGroup = "Config";
 
-    public Server(String[] args, String autoIP){
-        spreadIP.add("34.89.68.176");
-        spreadIP.add("35.246.58.5");
+    public StorageServer(String[] args, String autoIP){
 
-        if(args.length > 0 && this.spreadIP.contains(args[0]))
-            this.spreadIP.add(args[0]);
+        if(args.length > 0 && spreadIP.contains(args[0])){
+            spreadName = args[0];
+            spreadIP= args[1];
+            grcpPort = Integer.parseInt(args[2]);
+
+        }
 
         grcpIP = autoIP;
         this.startServers();
@@ -41,21 +40,23 @@ public class Server{
     }
 
     private void startServers(){
-        for(String ip: spreadIP){
-            try  {
-                spreadConn= new SpreadConnection();
-                spreadConn.connect(
-                        Inet4Address.getByName(ip),
-                        this.spreadPort,this.spreadName,
-                        false, true);
+        try  {
+            spreadConn= new SpreadConnection();
+            spreadConn.connect(
+                    Inet4Address.getByName(spreadIP),
+                    4803,spreadName,
+                    false, true);
 
-                this.storageService = new StorageService(this.repo, this.spreadConn); //servico do grcp
-                this.grcpServer = ServerBuilder
+            if(spreadConn.isConnected()){
+                this.storageService = new StorageService(this.repo, this.spreadConn);
+
+                //servico do grcp
+                grcpServer = ServerBuilder
                         .forPort(grcpPort)
                         .addService(this.storageService)
                         .build();
 
-                this.grcpServer.start();
+                grcpServer.start();
 
                 msgHandling = new MessageListener(this.storageService);
 
@@ -64,32 +65,34 @@ public class Server{
                 joingSpreadGroup(configGroup);
 
                 //apos entrar ao grupo, enviar msg com dados ip,port ao configServer
-                this.storageService.sendSpreadMSG(
+                storageService.sendSpreadMSG(
                         configGroup,
                         MsgType.CONFIG_RES,
                         grcpIP,
                         String.valueOf(grcpPort)
                 );
-                break;
-
-            }catch(SpreadException e)  {
-                System.err.println("Error Connecting to Daemon. \n");
-            }
-            catch(UnknownHostException e) {
-                System.err.println("Can't Find Daemon, Unkown Host " + this.spreadIP +"\n");
-                System.exit(1);
-            } catch (IOException e) {
-                System.err.println("Can't Start Grcp server.Server " + this.grcpPort + "\n");
+            }else{
+                System.err.println("Coudn't Connect to Spread Server.. shutting donw");
                 System.exit(1);
             }
+        }catch (SpreadException e) {
+            System.err.println("Error Connecting to Daemon \n");
+            System.exit(1);
+        } catch(UnknownHostException e) {
+            System.err.println("Can't Find Daemon, Unkown Host " + spreadIP +"\n");
+            System.exit(1);
+        } catch (IOException e) {
+            System.err.println("Can't Start Grcp server.Server " + grcpPort + "\n");
+            System.exit(1);
         }
+
     }
 
 
     private void joingSpreadGroup(String name){
         try {
             SpreadGroup group = new SpreadGroup();
-            group.join(this.spreadConn, name);
+            group.join(spreadConn, name);
         } catch (SpreadException e) {
             System.err.println("Failed to join Group " + name + "\n");
         }
@@ -102,13 +105,14 @@ public class Server{
             Scanner sc = new Scanner(System.in);
             sc.nextLine();
 
-            this.grcpServer.shutdown();
-            this.spreadConn.remove(this.msgHandling);
-            this.spreadConn.disconnect();
+            grcpServer.shutdown();
+            spreadConn.remove(msgHandling);
+            spreadConn.disconnect();
 
 
         } catch (SpreadException e) {
             System.err.println("Error Disconnecting Spread server.Server \n");
+            System.exit(0);
         }
         System.exit(0);
     }
@@ -120,7 +124,7 @@ public class Server{
             socket.connect(new InetSocketAddress("google.com", 80));
             String ip = socket.getLocalAddress().toString().substring(1);
 
-            Server server = new Server(args, ip);
+            StorageServer server = new StorageServer(args, ip);
         } catch (IOException e) {
             e.printStackTrace();
         }

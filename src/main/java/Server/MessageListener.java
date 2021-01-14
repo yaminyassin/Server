@@ -1,4 +1,4 @@
-package StorageServer;
+package Server;
 
 import io.grpc.stub.StreamObserver;
 import rpcstubs.Valor;
@@ -42,7 +42,7 @@ public class MessageListener implements AdvancedMessageListener {
 
                         if(value != null)
                             this.storageService.sendSpreadMSG(
-                                    Server.consensusGroup,
+                                    StorageServer.consensusGroup,
                                     MsgType.READ_RES,
                                     obj.key,
                                     value);
@@ -53,7 +53,7 @@ public class MessageListener implements AdvancedMessageListener {
 
                         if(storageRepo.contains(obj.key)){
                             this.storageService.sendSpreadMSG(
-                                    Server.consensusGroup,
+                                    StorageServer.consensusGroup,
                                     MsgType.INVALIDATE,
                                     obj.key,
                                     obj.value);
@@ -80,10 +80,10 @@ public class MessageListener implements AdvancedMessageListener {
                         System.out.println("Recieved CONFIG_REQ(IP, PORT)" );
                         System.out.println("Sending CONFIG_RES to Sender.. \n");
                         this.storageService.sendSpreadMSG(
-                                Server.configGroup,
+                                StorageServer.configGroup,
                                 MsgType.CONFIG_RES,
-                                Server.grcpIP,
-                                String.valueOf(Server.grcpPort));
+                                StorageServer.grcpIP,
+                                String.valueOf(StorageServer.grcpPort));
                         break;
 
                     case ELECTION_REQ:
