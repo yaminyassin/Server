@@ -27,10 +27,11 @@ public class Server {
 
     public Server(String[] args, String autoIP){
         grcpIP = autoIP;
-        if(args.length > 0 && spreadIP.contains(args[0])){
-            spreadName = args[0];
-            grcpIP= args[1];
-            grcpPort = Integer.parseInt(args[2]);
+        if(args.length > 0 ){
+            spreadIP = args[0];
+            spreadName = args[1];
+            grcpIP= args[2];
+            grcpPort = Integer.parseInt(args[3]);
         }
 
 
