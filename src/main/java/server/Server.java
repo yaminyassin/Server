@@ -26,6 +26,9 @@ public class Server {
     public static final String configGroup = "Config";
 
     public Server(String[] args){
+        //spreadName="YaminPC";
+        //spreadIP="35.246.58.5";
+        //grcpPort = 5001;
         if(args.length > 0 ){
             spreadName = args[0];
             spreadIP = args[1];
@@ -47,7 +50,7 @@ public class Server {
 
             if(spreadConn.isConnected()){
                 this.storageService = new StorageService(this.repo, this.spreadConn);
-
+                //grcpIP = "192.168.1.250";
                 grcpIP = spreadIP;
 
                 grcpServer = ServerBuilder

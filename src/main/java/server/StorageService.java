@@ -65,6 +65,16 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
                     null);
 
             readWaitList.put(key, responseObserver);
+        }else{
+            Valor valor = Valor
+                    .newBuilder()
+                    .setValue(value)
+                    .build();
+
+            System.out.println("Sending key { " + key + ", " + value + "} to Client." );
+
+            responseObserver.onNext(valor);
+            responseObserver.onCompleted();
         }
 
         int contador = 0;
@@ -89,18 +99,6 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
             responseObserver.onNext(valor);
             responseObserver.onCompleted();
             readWaitList.remove(key, responseObserver);
-        }else{
-            assert value != null;
-            System.out.println("VALOR = " + value);
-            Valor valor = Valor
-                    .newBuilder()
-                    .setValue(value)
-                    .build();
-
-            System.out.println("Sending key { " + key + ", " + value + "} to Client." );
-
-            responseObserver.onNext(valor);
-            responseObserver.onCompleted();
         }
     }
 
