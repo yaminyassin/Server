@@ -40,35 +40,28 @@ public class MessageListener implements AdvancedMessageListener {
                         System.out.println("Recieved READ_REQ From: " + msg + "\n");
                         String value = (String) storageRepo.get(obj.key);
 
-                        if(value != null)
+                        if(value != null){
+                            System.out.println("Sending READ_RES to: " + msg + "\n");
                             this.storageService.sendSpreadMSG(
-                                    Server.consensusGroup,
+                                    msg,
                                     MsgType.READ_RES,
                                     obj.key,
                                     value);
+                        }
                         break;
 
                     case READ_RES:
                         System.out.println("Recieved READ_RES With {" + obj.key + ", " + obj.value + "}. \n");
 
-                        if(storageRepo.contains(obj.key)){
-                            this.storageService.sendSpreadMSG(
-                                    Server.consensusGroup,
-                                    MsgType.INVALIDATE,
-                                    obj.key,
-                                    obj.value);
-                        }else{
-                            Valor valor = Valor
-                                    .newBuilder()
-                                    .setValue(obj.value)
-                                    .build();
+                        Valor valor = Valor
+                                .newBuilder()
+                                .setValue(obj.value)
+                                .build();
 
-                            StreamObserver<Valor> cliente = readWaitList.get(obj.key);
+                        readWaitList.get(obj.key).onNext(valor);
+                        readWaitList.get(obj.key).onCompleted();
+                        readWaitList.remove(obj.key);
 
-                            cliente.onNext(valor);
-                            cliente.onCompleted();
-                            readWaitList.remove(obj.key, cliente);
-                        }
                         break;
 
                     case INVALIDATE:

@@ -37,7 +37,6 @@ public class JsonRepo implements Serializable {
         JSONObject data = new JSONObject();
         try {
 
-
             data = (JSONObject) parser.parse(new FileReader(filename));
 
         } catch (IOException | ParseException e) {
@@ -56,7 +55,7 @@ public class JsonRepo implements Serializable {
 
     public Object get(String key) {
         this.printkeyExists(key);
-
+        this.repositorio = (JSONObject) readFile(filename);
         return this.repositorio.get(key);
     }
 

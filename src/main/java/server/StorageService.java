@@ -91,12 +91,13 @@ public class StorageService extends StorageServiceGrpc.StorageServiceImplBase {
             readWaitList.remove(key, responseObserver);
         }else{
             assert value != null;
+            System.out.println("VALOR = " + value);
             Valor valor = Valor
                     .newBuilder()
                     .setValue(value)
                     .build();
 
-            System.out.println("Key Doesn't Exist. \n");
+            System.out.println("Sending key { " + key + ", " + value + "} to Client." );
 
             responseObserver.onNext(valor);
             responseObserver.onCompleted();
