@@ -18,20 +18,18 @@ public class Server {
     private io.grpc.Server grcpServer;
 
     //vars do spread
-    private String spreadIP = "35.246.58.5";
+    private String spreadIP;
     private SpreadConnection spreadConn;
     private MessageListener msgHandling;
-    private String spreadName = "serv";
+    private String spreadName;
     public static final String consensusGroup = "Consensus";
     public static final String configGroup = "Config";
 
-    public Server(String[] args, String autoIP){
-        grcpIP = autoIP;
+    public Server(String[] args){
         if(args.length > 0 ){
-            spreadIP = args[0];
-            spreadName = args[1];
-            grcpIP= args[2];
-            grcpPort = Integer.parseInt(args[3]);
+            spreadName = args[0];
+            spreadIP = args[1];
+            grcpPort = Integer.parseInt(args[2]);
         }
 
 
@@ -50,7 +48,8 @@ public class Server {
             if(spreadConn.isConnected()){
                 this.storageService = new StorageService(this.repo, this.spreadConn);
 
-                //servico do grcp
+                grcpIP = spreadIP;
+
                 grcpServer = ServerBuilder
                         .forPort(grcpPort)
                         .addService(this.storageService)
@@ -71,9 +70,6 @@ public class Server {
                         grcpIP,
                         String.valueOf(grcpPort)
                 );
-            }else{
-                System.err.println("Coudn't Connect to Spread Server.. shutting donw");
-                System.exit(1);
             }
         }catch (SpreadException e) {
             System.err.println("Error Connecting to Daemon \n");
@@ -119,15 +115,6 @@ public class Server {
 
 
     public static void main(String[] args) {
-        try {
-            Socket socket = new Socket();
-            socket.connect(new InetSocketAddress("google.com", 80));
-            String ip = socket.getLocalAddress().toString().substring(1);
-
-            Server server = new Server(args, ip);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+            Server server = new Server(args);
     }
 }
